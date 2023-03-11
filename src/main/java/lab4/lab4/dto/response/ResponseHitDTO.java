@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResponseHitDTO {
-    private int x;
+    private float x;
 
     private float y;
 

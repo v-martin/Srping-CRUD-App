@@ -37,7 +37,9 @@ public class AuthService {
             throw new NotFoundException("User with email " + authDto.getEmail() + " is not registered");
         }
         User user = userEntityOptional.get();
-        if (passwordEncoder.matches(user.getPassword(), authDto.getPassword())) {
+        if (!passwordEncoder.matches(authDto.getPassword(), user.getPassword())) {
+            System.out.println(user.getPassword());
+            System.out.println(authDto.getPassword());
             throw new BadRequestException("Wrong password or email");
         }
         return user;

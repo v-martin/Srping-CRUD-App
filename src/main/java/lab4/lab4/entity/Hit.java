@@ -13,7 +13,7 @@ public class Hit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Hit(int x, float y, int r, boolean status, String beginDate, float codeTime, Long userId) {
+    public Hit(float x, float y, int r, boolean status, String beginDate, float codeTime, Long userId) {
         this.x = x;
         this.y = y;
         this.r = r;
@@ -23,7 +23,7 @@ public class Hit {
         this.userId = userId;
     }
 
-    private int x;
+    private float x;
 
     private float y;
 

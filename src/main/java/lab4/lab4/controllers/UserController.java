@@ -11,6 +11,7 @@ import lab4.lab4.dto.response.TokenDTO;
 import lab4.lab4.dto.response.UserInfoDTO;
 import lab4.lab4.entity.User;
 import lab4.lab4.exceptions.BadRequestException;
+import lab4.lab4.exceptions.HttpException;
 import lab4.lab4.exceptions.NotFoundException;
 import lab4.lab4.services.JWTBase;
 import lab4.lab4.services.AuthService;
@@ -20,7 +21,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
 @CrossOrigin
@@ -40,7 +45,10 @@ public class  UserController {
     }
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<?> registration(@Valid SignupUserDTO registrationDto) {
+    public ResponseEntity<?> registration(@Valid SignupUserDTO registrationDto, Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors.getFieldErrors());
+        }
         try {
             User user = this.authService.registration(registrationDto);
             this.userService.AuthenticateUserInContext(user.getEmail());
@@ -51,11 +59,15 @@ public class  UserController {
                             user.getEmail(), user.getFirstName(), user.getLastName())
             );
         } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getLocalizedMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Map[]{Collections.singletonMap("defaultMessage",
+                    e.getMessage())});
         }
     }
     @PostMapping("/auth/login")
-    public ResponseEntity<?> login(@Valid LoginUserDTO loginDto) {
+    public ResponseEntity<?> login(@Valid LoginUserDTO loginDto, Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors.getFieldErrors());
+        }
         try {
             User user = this.authService.login(loginDto);
             this.userService.AuthenticateUserInContext(user.getEmail());
@@ -65,8 +77,9 @@ public class  UserController {
                     new UserInfoDTO(jwtAccessToken, jwtRefreshToken, user.getId(),
                             user.getEmail(), user.getFirstName(), user.getLastName())
             );
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (HttpException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Map[]{Collections.singletonMap("defaultMessage",
+                    e.getMessage())});
         }
     }
 
